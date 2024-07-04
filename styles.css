@@ -1,0 +1,33 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.image-container {
+    width: 80%;
+    max-width: 1200px;
+    height: 80vh; /* Fixed height of the container */
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    touch-action: pan-y; /* Enable vertical scrolling via touch */
+    -webkit-overflow-scrolling: touch; /* For WebKit browsers */
+}
+
+
+
+.image-container img {
+    max-width: 80%; /* Ensure images don't exceed their original width */
+    height: auto; /* Automatically adjust height to maintain aspect ratio */
+    width: auto; /* Automatically adjust height to maintain aspect ratio */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: none; /* Initially hide images */
+}
