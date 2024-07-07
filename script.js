@@ -1,8 +1,8 @@
 $(document).ready(function() {
-    Init();
+    displayItems();
 
     // Mouse Wheel event : jQuery Mouse Wheel Plugin
-    $('.pane,.scrzone').mousewheel(function(event) {
+    $('#ScrollPane, .scrzone').mousewheel(function(event) {
         event.preventDefault();
         if($ScrollState == false) {
             $ScrollState = true;
@@ -54,27 +54,85 @@ $(document).ready(function() {
         $('.visible').removeClass('visible');
         $('.pane').first().addClass('visible');
         $('#Helper').html("Init()"); // Helper
-
-        // Load images
-        loadImages();
+    }function showLoader() {
+        const loaderContainer = document.getElementById('loaderContainer');
+        loaderContainer.style.display = 'flex';
     }
 
-    // Load images into slides
-    function loadImages() {
-        const imageUrls = [
-            "https://lh3.googleusercontent.com/drive-viewer/AKGpihYC5zalNAuEdMUmRt0QpZVkfpNESi7qES4WqvaabHOvmMon9zmHJdDMkyxBFbssYuMDN2vXR2cPvE_DiI4oqrBesXVG0cTK6w=s2560",
-            "https://lh3.googleusercontent.com/drive-viewer/AKGpihZlDppPOyBHIhbuLJdDgA0fSdSWrzb72KFxytOiihRi6r-3kLBNr3iRlAb0lxrAGHvlzSUwlAHGoH_YVzHtFv0GcKtJ1-MEz5A=s2560",
-            "https://lh3.googleusercontent.com/drive-viewer/AKGpiha-sWAcc-Y4NJxUHvvEiunKOruHmiFokfUfKYNVe6Vtn_ztLUf2s5HwTCT9-qxKWZQRtDlCcirB1ZtqS3bKMz_XRePk5vJc-Mc=s2560",
-            "https://lh3.googleusercontent.com/drive-viewer/AKGpihYC5zalNAuEdMUmRt0QpZVkfpNESi7qES4WqvaabHOvmMon9zmHJdDMkyxBFbssYuMDN2vXR2cPvE_DiI4oqrBesXVG0cTK6w=s2560",
-            "https://lh3.googleusercontent.com/drive-viewer/AKGpihZlDppPOyBHIhbuLJdDgA0fSdSWrzb72KFxytOiihRi6r-3kLBNr3iRlAb0lxrAGHvlzSUwlAHGoH_YVzHtFv0GcKtJ1-MEz5A=s2560",
-            "https://lh3.googleusercontent.com/drive-viewer/AKGpiha-sWAcc-Y4NJxUHvvEiunKOruHmiFokfUfKYNVe6Vtn_ztLUf2s5HwTCT9-qxKWZQRtDlCcirB1ZtqS3bKMz_XRePk5vJc-Mc=s2560",
-            "https://lh3.googleusercontent.com/drive-viewer/AKGpihYC5zalNAuEdMUmRt0QpZVkfpNESi7qES4WqvaabHOvmMon9zmHJdDMkyxBFbssYuMDN2vXR2cPvE_DiI4oqrBesXVG0cTK6w=s2560"
-        ];
+    // Fetch items from Google Sheets and display them
+    async function fetchItems() {
+        showLoader();
+        console.log('Fetching items from Google Sheets...');
+        try {
+            const response = await fetch('https://script.google.com/macros/s/AKfycbwt3hiNq0oU2zywpaLlpy-ILCZljRw4hwTjFjEhzx_iPZkp1jZKRqXTHmd-LCU0f5t9vA/exec');
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+            const data = await response.json();
+            console.log('Data fetched from Google Sheets:', data);
+            return data || [];
+        } catch (error) {
+            console.error('Error fetching items:', error);
+        } finally {
+            hideLoader();
+        }
+    }
 
-        $('.pane').each(function(index) {
-            const imageUrl = imageUrls[index];
-            $(this).find('.image-container').append('<img src="' + imageUrl + '" alt="Slide Image">');
+    function createSlide(item) {
+        const slide = document.createElement('div');
+        slide.classList.add('pane');
+        slide.setAttribute('data-id', item.id);
+
+        const container = document.createElement('div');
+        container.classList.add('ct');
+
+        const imageContainer = document.createElement('div');
+        imageContainer.classList.add('image-container');
+        const img = document.createElement('img');
+        img.src = item.url;
+        img.alt = item.name;
+
+        imageContainer.appendChild(img);
+        container.appendChild(imageContainer);
+        slide.appendChild(container);
+
+        return slide;
+    }
+
+    async function displayItems() {
+        const items = await fetchItems();
+
+        // Clear existing content in container
+        const container = document.querySelector('#ScrollPane');
+        container.innerHTML = '';
+
+        // Extract the header row
+        const headers = items[0]; 
+
+        // Map headers to indexes
+        const headerIndexes = {};
+        headers.forEach((header, index) => {
+            headerIndexes[header.toLowerCase()] = index;
         });
+
+        // Remove header row from items array
+        items.shift();
+
+        // Create and append slides
+        items.forEach(item => {
+            const slideData = {
+                id: item[headerIndexes['id']],
+                name: item[headerIndexes['name']],
+                price: item[headerIndexes['price']],
+                url: item[headerIndexes['url']]
+            };
+
+            const slide = createSlide(slideData);
+            container.appendChild(slide);
+        });
+
+        // Reinitialize the scrolling functionality
+        Init();
     }
 
     // ANIMATE
@@ -108,6 +166,11 @@ $(document).ready(function() {
                 $CibleSlideDOM.addClass('visible'); // Add visible class to target slide
             }
         });
+    }
+
+    function hideLoader() {
+        const loaderContainer = document.getElementById('loaderContainer');
+        loaderContainer.style.display = 'none';
     }
 
     // Init() On Resize
