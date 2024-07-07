@@ -52,26 +52,52 @@ $(document).ready(function() {
         }); // List of slides (.pane)
         gsap.to(window, { duration: 0, scrollTo: { y: 0 } });
         $('.visible').removeClass('visible');
+        $('.pane').first().addClass('visible');
         $('#Helper').html("Init()"); // Helper
+
+        // Load images
+        loadImages();
+    }
+
+    // Load images into slides
+    function loadImages() {
+        const imageUrls = [
+            "https://lh3.googleusercontent.com/drive-viewer/AKGpihYC5zalNAuEdMUmRt0QpZVkfpNESi7qES4WqvaabHOvmMon9zmHJdDMkyxBFbssYuMDN2vXR2cPvE_DiI4oqrBesXVG0cTK6w=s2560",
+            "https://lh3.googleusercontent.com/drive-viewer/AKGpihZlDppPOyBHIhbuLJdDgA0fSdSWrzb72KFxytOiihRi6r-3kLBNr3iRlAb0lxrAGHvlzSUwlAHGoH_YVzHtFv0GcKtJ1-MEz5A=s2560",
+            "https://lh3.googleusercontent.com/drive-viewer/AKGpiha-sWAcc-Y4NJxUHvvEiunKOruHmiFokfUfKYNVe6Vtn_ztLUf2s5HwTCT9-qxKWZQRtDlCcirB1ZtqS3bKMz_XRePk5vJc-Mc=s2560",
+            "https://lh3.googleusercontent.com/drive-viewer/AKGpihYC5zalNAuEdMUmRt0QpZVkfpNESi7qES4WqvaabHOvmMon9zmHJdDMkyxBFbssYuMDN2vXR2cPvE_DiI4oqrBesXVG0cTK6w=s2560",
+            "https://lh3.googleusercontent.com/drive-viewer/AKGpihZlDppPOyBHIhbuLJdDgA0fSdSWrzb72KFxytOiihRi6r-3kLBNr3iRlAb0lxrAGHvlzSUwlAHGoH_YVzHtFv0GcKtJ1-MEz5A=s2560",
+            "https://lh3.googleusercontent.com/drive-viewer/AKGpiha-sWAcc-Y4NJxUHvvEiunKOruHmiFokfUfKYNVe6Vtn_ztLUf2s5HwTCT9-qxKWZQRtDlCcirB1ZtqS3bKMz_XRePk5vJc-Mc=s2560",
+            "https://lh3.googleusercontent.com/drive-viewer/AKGpihYC5zalNAuEdMUmRt0QpZVkfpNESi7qES4WqvaabHOvmMon9zmHJdDMkyxBFbssYuMDN2vXR2cPvE_DiI4oqrBesXVG0cTK6w=s2560"
+        ];
+
+        $('.pane').each(function(index) {
+            const imageUrl = imageUrls[index];
+            $(this).find('.image-container').append('<img src="' + imageUrl + '" alt="Slide Image">');
+        });
     }
 
     // ANIMATE
     function UpdateScreen(operator) {
         $ActualSlide = $CibleSlide;
+        let newIndex = $ListSlides.indexOf($ActualSlide);
+
         if (operator == "+") {
-            $CibleSlide = $ListSlides[$ListSlides.indexOf($ActualSlide) + 1];
+            newIndex += 1;
         } else {
-            $CibleSlide = $ListSlides[$ListSlides.indexOf($ActualSlide) - 1];
-        } // If + next slide / if - previous slide
-        $('#Helper').html("From <strong>" + $ActualSlide + "</strong> to <strong>" + $CibleSlide + "</strong>"); // helper
-        if (!$CibleSlide) {
+            newIndex -= 1;
+        }
+
+        if (newIndex < 0 || newIndex >= $ListSlides.length) {
             $ScrollState = false;
-            $('#Helper').html("Break");
-            $CibleSlide = $ActualSlide;
             return;
-        } // Stops everything if there is no slide before/after
+        }
+
+        $CibleSlide = $ListSlides[newIndex];
+        $('#Helper').html("From <strong>" + $ActualSlide + "</strong> to <strong>" + $CibleSlide + "</strong>"); // helper
         $ActualSlideDOM = $('.pane[data-id=' + $ActualSlide + ']');
         $CibleSlideDOM = $('.pane[data-id=' + $CibleSlide + ']');
+        $ActualSlideDOM.removeClass('visible'); // Remove visible class from current slide
         // Scroll To : Greensock GSAP
         gsap.to(window, {
             duration: $ScrollSpeed,
@@ -79,7 +105,7 @@ $(document).ready(function() {
             ease: "power2.out",
             onComplete: function() {
                 $ScrollState = false;
-                $CibleSlideDOM.addClass('visible');
+                $CibleSlideDOM.addClass('visible'); // Add visible class to target slide
             }
         });
     }
