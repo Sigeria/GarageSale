@@ -1,14 +1,27 @@
+// Функция для загрузки содержимого HTML файла
+function loadHTML(url, containerId) {
+    fetch(url)
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById(containerId).innerHTML = data;
+      })
+      .catch(error => console.error('Error loading HTML:', error));
+}
+
+// Загрузить лоадер в контейнер с id "loaderContainer"
+loadHTML('loader.html', 'loaderContainer');
+
 $(document).ready(function() {
     displayItems();
 
     // Mouse Wheel event : jQuery Mouse Wheel Plugin
     $('#ScrollPane, .scrzone').mousewheel(function(event) {
         event.preventDefault();
-        if($ScrollState == false) {
+        if ($ScrollState == false) {
             $ScrollState = true;
-            if(event.deltaY < 0) {
+            if (event.deltaY < 0) {
                 UpdateScreen('+');
-            } else if(event.deltaY > 0) {
+            } else if (event.deltaY > 0) {
                 UpdateScreen('-');
             } else {
                 $ScrollState = false;
@@ -16,28 +29,21 @@ $(document).ready(function() {
         }
     });
 
-    // Touch event support
-    let touchStartY = 0;
-    let touchEndY = 0;
+    // Touch event support with Hammer.js
+    const hammer = new Hammer(document.querySelector('#ScrollPane, .scrzone'));
+    hammer.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
 
-    $('.pane,.scrzone').on('touchstart', function(event) {
-        touchStartY = event.changedTouches[0].screenY;
-    });
-
-    $('.pane,.scrzone').on('touchmove', function(event) {
-        touchEndY = event.changedTouches[0].screenY;
-    });
-
-    $('.pane,.scrzone').on('touchend', function(event) {
+    hammer.on('swipeup', function() {
         if ($ScrollState == false) {
             $ScrollState = true;
-            if (touchStartY - touchEndY > 50) {
-                UpdateScreen('+');
-            } else if (touchEndY - touchStartY > 50) {
-                UpdateScreen('-');
-            } else {
-                $ScrollState = false;
-            }
+            UpdateScreen('+');
+        }
+    });
+
+    hammer.on('swipedown', function() {
+        if ($ScrollState == false) {
+            $ScrollState = true;
+            UpdateScreen('-');
         }
     });
 
@@ -54,9 +60,16 @@ $(document).ready(function() {
         $('.visible').removeClass('visible');
         $('.pane').first().addClass('visible');
         $('#Helper').html("Init()"); // Helper
-    }function showLoader() {
+    }
+
+    function showLoader() {
         const loaderContainer = document.getElementById('loaderContainer');
         loaderContainer.style.display = 'flex';
+    }
+
+    function hideLoader() {
+        const loaderContainer = document.getElementById('loaderContainer');
+        loaderContainer.style.display = 'none';
     }
 
     // Fetch items from Google Sheets and display them
@@ -166,11 +179,6 @@ $(document).ready(function() {
                 $CibleSlideDOM.addClass('visible'); // Add visible class to target slide
             }
         });
-    }
-
-    function hideLoader() {
-        const loaderContainer = document.getElementById('loaderContainer');
-        loaderContainer.style.display = 'none';
     }
 
     // Init() On Resize
