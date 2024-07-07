@@ -1,4 +1,5 @@
 async function fetchItems() {
+    showLoader(); // Show loader before fetching items
     console.log('Fetching items from Google Sheets...');
     try {
         const response = await fetch('https://script.google.com/macros/s/AKfycbwt3hiNq0oU2zywpaLlpy-ILCZljRw4hwTjFjEhzx_iPZkp1jZKRqXTHmd-LCU0f5t9vA/exec');
@@ -10,12 +11,17 @@ async function fetchItems() {
         return data || [];
     } catch (error) {
         console.error('Error fetching items:', error);
+    } finally {
+        hideLoader(); // Hide loader after fetching items (whether successful or not)
     }
 }
 
 function displayItems(items) {
     const container = document.getElementById('imageContainer');
     console.log('Displaying items...');
+
+    // Clear existing content in container
+    container.innerHTML = '';
 
     // Extract the header row
     const headers = items[0];
@@ -77,7 +83,7 @@ function lazyLoadImages() {
     let observer = new IntersectionObserver((entries, self) => {
         entries.forEach(entry => {
             console.log('Intersection Observer entry:', entry);
-            if (/*entry.isIntersecting*/true) {
+            if (entry.isIntersecting) {
                 console.log('Image is in viewport, loading image:', entry.target);
                 preloadImage(entry.target);
                 self.unobserve(entry.target);
@@ -108,35 +114,19 @@ function preloadImage(img) {
     };
 }
 
-function unloadImages() {
-    const images = document.querySelectorAll('img');
-    const config = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1
-    };
+function showLoader() {
+    const loaderContainer = document.getElementById('loaderContainer');
+    loaderContainer.style.display = 'flex'; // Show loader
+}
 
-    let observer = new IntersectionObserver((entries, self) => {
-        entries.forEach(entry => {
-            if (!entry.isIntersecting) {
-                console.log('Image is out of viewport, unloading image:', entry.target);
-                entry.target.src = '';
-                entry.target.style.display = 'none'; // Hide image when unloaded
-            }
-        });
-    }, config);
-
-    images.forEach(image => {
-        observer.observe(image);
-    });
-
-    console.log('Unload images observer initialized.');
+function hideLoader() {
+    const loaderContainer = document.getElementById('loaderContainer');
+    loaderContainer.style.display = 'none'; // Hide loader
 }
 
 fetchItems().then(items => {
     if (items && items.length > 0) {
         displayItems(items);
-        //unloadImages();
     } else {
         console.log('No images found in the specified range.');
     }

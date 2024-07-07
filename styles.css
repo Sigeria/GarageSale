@@ -31,3 +31,22 @@ body {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     display: none; /* Initially hide images */
 }
+
+.loader {
+    margin: 0 0 2em;
+    height: 100px;
+    width: 20%;
+    text-align: center;
+    padding: 1em;
+    margin: 0 auto 1em;
+    display: inline-block;
+    vertical-align: top;
+  }
+  
+  .new-element {
+    background-color: #fff;
+    padding: 1em;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+  }
+  
