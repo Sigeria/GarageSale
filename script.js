@@ -51,7 +51,6 @@ $(document).ready(function() {
             $ListSlides.push($(this).attr('data-id'));
         }); // List of slides (.pane)
         gsap.to(window, { duration: 0, scrollTo: { y: 0 } });
-        gsap.to('.spane', { duration: 0, scrollTo: { y: 0, x: 0 } });
         $('.visible').removeClass('visible');
         $('#Helper').html("Init()"); // Helper
     }
@@ -74,28 +73,15 @@ $(document).ready(function() {
         $ActualSlideDOM = $('.pane[data-id=' + $ActualSlide + ']');
         $CibleSlideDOM = $('.pane[data-id=' + $CibleSlide + ']');
         // Scroll To : Greensock GSAP
-        if ($ActualSlideDOM.closest('.prt').find('.spane').length &&
-            (operator == "+" && $ActualSlideDOM.next('.pane').length || operator == "-" && $ActualSlideDOM.prev('.pane').length)) {
-            gsap.to($ActualSlideDOM.closest('.spane'), {
-                duration: $ScrollSpeed,
-                scrollTo: { y: $CibleSlideDOM.position().top },
-                ease: "power2.out",
-                onComplete: function() {
-                    $ScrollState = false;
-                    $CibleSlideDOM.addClass('visible');
-                }
-            });
-        } else {
-            gsap.to(window, {
-                duration: $ScrollSpeed,
-                scrollTo: { y: $CibleSlideDOM.offset().top },
-                ease: "power2.out",
-                onComplete: function() {
-                    $ScrollState = false;
-                    $CibleSlideDOM.addClass('visible');
-                }
-            });
-        }
+        gsap.to(window, {
+            duration: $ScrollSpeed,
+            scrollTo: { y: $CibleSlideDOM.offset().top },
+            ease: "power2.out",
+            onComplete: function() {
+                $ScrollState = false;
+                $CibleSlideDOM.addClass('visible');
+            }
+        });
     }
 
     // Init() On Resize
