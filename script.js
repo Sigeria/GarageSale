@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const itemsContainer = document.getElementById('imageContainer');
     let totalItems = 0;
     let currentIndex = 0;
+    let headerIndexes = {}; // Объявляем здесь, чтобы была видна во всех функциях
+    let slides = []; // Объявляем переменную slides
 
     async function fetchItems() {
         showLoader();
@@ -13,7 +15,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const data = await response.json();
             console.log('Data fetched from Google Sheets:', data);
-            return data || [];
+
+            // Установка headerIndexes
+            const headers = data[0];
+            headers.forEach((header, index) => {
+                headerIndexes[header.toLowerCase()] = index;
+            });
+
+            // Инициализация slides
+            slides = data.slice(1); // Пример: используем данные без заголовков
+
+            return slides || [];
         } catch (error) {
             console.error('Error fetching items:', error);
         } finally {
@@ -22,27 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayItems(items) {
-        console.log('Displaying items...');
-        // Clear existing content in container
-    
-        // Extract the header row
-        const headers = items[0]; 
-    
-    
-        // Map headers to indexes
-        const headerIndexes = {};
-        headers.forEach((header, index) => {
-            headerIndexes[header.toLowerCase()] = index;
-        });
-    
-        // Remove header row from items array
-        items.shift();
-
-        items.forEach(item => {
-            const id = item[headerIndexes['id']];
-        const name = item[headerIndexes['name']];
-        const price = item[headerIndexes['price']];
-        const url = item[headerIndexes['url']];
+        items.forEach((item, index) => {
+            const name = item[headerIndexes['name']];
+            const price = item[headerIndexes['price']];
+            const url = item[headerIndexes['url']];
 
             const itemElement = document.createElement('div');
             itemElement.classList.add('item');
@@ -62,15 +57,20 @@ document.addEventListener('DOMContentLoaded', function() {
             itemElement.appendChild(nameElement);
             itemElement.appendChild(priceElement);
             itemsContainer.appendChild(itemElement);
+
+            // Создание слайда для вертикального скроллинга
+            const slideElement = document.createElement('div');
+            slideElement.classList.add('scr');
+            slideElement.textContent = name; // Используйте имя товара или другие данные для отображения
+            slideElement.setAttribute('data-id', `slide${index + 1}`);
+            slideElement.addEventListener('click', () => {
+                currentIndex = index;
+                showItem(currentIndex);
+            });
+            scrollPane.appendChild(slideElement);
         });
 
-        // Display the first item initially
-        const firstItem = itemsContainer.querySelector('.item');
-        if (firstItem) {
-            firstItem.classList.add('active');
-        }
-
-        // Update totalItems after displaying items
+        // Установка общего количества элементов
         totalItems = items.length;
     }
 
@@ -89,14 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
         loaderContainer.style.display = 'none';
     }
 
-    fetchItems().then(items => {
-        if (items && items.length > 0) {
-            displayItems(items);
-        } else {
-            console.log('No items found.');
-        }
-    });
-
     function showItem(index) {
         const items = document.querySelectorAll('.item');
         items.forEach((item, idx) => {
@@ -108,17 +100,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    showItem(currentIndex);
+    fetchItems().then(items => {
+        if (items && items.length > 0) {
+            displayItems(items);
+        } else {
+            console.log('No items found.');
+        }
+    });
 
+    // Добавление инициализации скролла для вертикального скролла слайдов
+    const scrollPane = document.getElementById('ScrollPane');
+
+    // Обработка события скроллинга для переключения между слайдами
     window.addEventListener('wheel', function(event) {
         event.preventDefault();
-
         if (event.deltaY < 0) {
             currentIndex = Math.max(0, currentIndex - 1);
         } else {
-            currentIndex = Math.min(totalItems - 1, currentIndex + 1);
+            currentIndex = Math.min(slides.length - 1, currentIndex + 1);
         }
-
         showItem(currentIndex);
     }, { passive: false });
 });

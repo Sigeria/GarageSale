@@ -55,7 +55,34 @@ h1 {
 
 .item.active {
     display: block; /* Display only active item */
+}#ScrollPane {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20%;
+    background-color: #333;
+    overflow-y: scroll;
+    z-index: 1000;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
+
+.scr {
+    margin-bottom: 20px;
+    padding: 10px;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.scr:hover {
+    background-color: #555;
+}
+
+
 
 .item img {
     max-width: 100%;
@@ -68,7 +95,7 @@ h1 {
 .item-name {
     font-size: 1.2em;
     font-weight: bold;
-    color: #333;
+    color: #b1a939;
     margin-top: 10px;
 }
 
