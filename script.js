@@ -1,9 +1,7 @@
-
-
 async function fetchItems() {
     console.log('Fetching items from Google Sheets...');
     try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbxz-8bb--deDLflfqyX2cH3IJZsWQ8Vh5P4is2JdrXtFgSbwzeCefrE78xo8dRXhSh2sA/exec');
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwt3hiNq0oU2zywpaLlpy-ILCZljRw4hwTjFjEhzx_iPZkp1jZKRqXTHmd-LCU0f5t9vA/exec');
         if (!response.ok) {
             throw new Error(`Error: ${response.statusText}`);
         }
@@ -15,22 +13,57 @@ async function fetchItems() {
     }
 }
 
-function displayImages(items) {
+function displayItems(items) {
     const container = document.getElementById('imageContainer');
-    console.log('Displaying images...');
+    console.log('Displaying items...');
 
-    items.forEach(item => {
-        const url = item[1]; // Assuming the URL is in the second column (index 1)
-        const img = document.createElement('img');
-        const directLink = url;
-        img.dataset.src = directLink; // Use data-src for lazy loading
-        img.style.display = 'block'; // Ensure the image is displayed
-        img.style.width = '100%';
-        container.appendChild(img);
+    // Extract the header row
+    const headers = items[0];
+
+    // Map headers to indexes
+    const headerIndexes = {};
+    headers.forEach((header, index) => {
+        headerIndexes[header.toLowerCase()] = index;
     });
 
-    console.log('Images added to container:', container);
+    // Remove header row from items array
+    items.shift();
+
+    items.forEach(item => {
+        const id = item[headerIndexes['id']];
+        const name = item[headerIndexes['name']];
+        const price = item[headerIndexes['price']];
+        const url = item[headerIndexes['url']];
+
+        const itemContainer = document.createElement('div');
+        itemContainer.classList.add('item-container');
+
+        const img = document.createElement('img');
+        const directLink = convertToDirectLink(url);
+        img.dataset.src = directLink; // Use data-src for lazy loading
+        img.classList.add('item-image');
+
+        const nameElement = document.createElement('p');
+        nameElement.textContent = `${name}`;
+        nameElement.classList.add('item-name');
+
+        const priceElement = document.createElement('p');
+        priceElement.textContent = `${price} GEL`;
+        priceElement.classList.add('item-price');
+
+        itemContainer.appendChild(img);
+        itemContainer.appendChild(nameElement);
+        itemContainer.appendChild(priceElement);
+        container.appendChild(itemContainer);
+    });
+
+    console.log('Items added to container:', container);
     lazyLoadImages();
+}
+
+function convertToDirectLink(url) {
+    // Add your logic to convert the URL to a direct link if necessary
+    return url;
 }
 
 function lazyLoadImages() {
@@ -44,7 +77,7 @@ function lazyLoadImages() {
     let observer = new IntersectionObserver((entries, self) => {
         entries.forEach(entry => {
             console.log('Intersection Observer entry:', entry);
-            if (entry.isIntersecting) {
+            if (/*entry.isIntersecting*/true) {
                 console.log('Image is in viewport, loading image:', entry.target);
                 preloadImage(entry.target);
                 self.unobserve(entry.target);
@@ -71,7 +104,7 @@ function preloadImage(img) {
     img.onload = () => {
         console.log('Image loaded:', img);
         img.removeAttribute('data-src');
-        img.style.display = 'block'; // Показываем изображение, когда оно загружено
+        img.style.display = 'block'; // Show image when loaded
     };
 }
 
@@ -88,7 +121,7 @@ function unloadImages() {
             if (!entry.isIntersecting) {
                 console.log('Image is out of viewport, unloading image:', entry.target);
                 entry.target.src = '';
-                entry.target.style.display = 'none'; // Скрываем изображение, когда оно выгружено
+                entry.target.style.display = 'none'; // Hide image when unloaded
             }
         });
     }, config);
@@ -100,24 +133,9 @@ function unloadImages() {
     console.log('Unload images observer initialized.');
 }
 
-async function fetchItems() {
-    console.log('Fetching items from Google Sheets...');
-    try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbwt3hiNq0oU2zywpaLlpy-ILCZljRw4hwTjFjEhzx_iPZkp1jZKRqXTHmd-LCU0f5t9vA/exec');
-        if (!response.ok) {
-            throw new Error(`Error: ${response.statusText}`);
-        }
-        const data = await response.json();
-        console.log('Data fetched from Google Sheets:', data);
-        return data || [];
-    } catch (error) {
-        console.error('Error fetching items:', error);
-    }
-}
-
 fetchItems().then(items => {
     if (items && items.length > 0) {
-        displayImages(items);
+        displayItems(items);
         //unloadImages();
     } else {
         console.log('No images found in the specified range.');
