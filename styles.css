@@ -1,3 +1,23 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600&display=swap");
+
+:root {
+    --body-font: "Montserrat", sans-serif;
+    --italic-font: "EB Garamond", serif;
+    --header-bg: #978475;
+    --menu-bg: #978475;
+    --menu-border: #978475;
+    --menu-hover-bg: #EFE2D9;
+    --menu-hover-color: #333;
+    --menu-font-color: #fff;
+    --font-color: rgba(255, 255, 255, 0.5);
+    --item-font-color: #333;
+    --background-color: #EFE2D9;
+    --pane-border: #978475;
+    --shadow-color: #cccccc;
+    --shadow-opacity: 0.3;
+}
+
 * {
     -o-box-sizing: border-box;
     box-sizing: border-box;
@@ -5,6 +25,7 @@
 
 html,
 body {
+    font-family: var(--body-font);
     width: 100%;
     height: 100%;
     margin: 0;
@@ -14,10 +35,42 @@ body {
 body {
     overflow: auto;
     overflow-x: hidden;
-    color: rgba(255, 255, 255, 0.5);
-    font-family: 'Poppins', sans-serif;
-    background-color: #EFE2D9;
-    /* Молочный цвет фона */
+    color: var(--font-color);
+    background-color: var(--background-color);
+}
+
+.header {
+    background-color: var(--header-bg);
+    padding: 10px 0;
+    text-align: center;
+    overflow-x: hidden;
+    position: fixed;
+    z-index: 1000;
+    width: 100%;
+}
+
+.menu {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    overflow-x: hidden;
+}
+
+.menu button {
+    background-color: var(--menu-bg);
+    border: 2px solid var(--menu-border);
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: var(--body-font);
+    color: var(--menu-font-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.menu button:hover {
+    background-color: var(--menu-hover-bg);
+    color: var(--menu-hover-color);
 }
 
 #ScrollPane {
@@ -45,14 +98,14 @@ body {
 }
 
 .pane {
-    border: 2px solid #978475; /* Коричневая рамка */
+    border: 2px solid var(--pane-border); /* Коричневая рамка */
 }
 
 b {
     font-size: 80px;
     display: block;
     color: #ffffff;
-    text-shadow: 1px 1px 0 #bbbbbb, 2px 2px 0 #cccccc, 3px 3px 0 #cccccc, 4px 4px 0 #cccccc, 5px 5px 0 #cccccc, 5px 5px 10px rgba(0, 0, 0, 0.3);
+    text-shadow: 1px 1px 0 #bbbbbb, 2px 2px 0 var(--shadow-color), 3px 3px 0 var(--shadow-color), 4px 4px 0 var(--shadow-color), 5px 5px 0 var(--shadow-color), 5px 5px 10px rgba(0, 0, 0, var(--shadow-opacity));
 }
 
 span {
@@ -87,7 +140,7 @@ span {
     width: 100%;
     height: auto;
     border-radius: 15px;
-    border: 2px solid #978475; /* Коричневая рамка */
+    border: 2px solid var(--pane-border); /* Коричневая рамка */
 }
 
 .text-container {
@@ -98,11 +151,11 @@ span {
 .item-name,
 .item-price {
     font-size: 24px;
-    color: #333;
+    color: var(--item-font-color);
     margin: 5px 0;
 }
 
-.text-container,
+body .text-container,
 .item-name,
 .item-price {
     pointer-events: none;

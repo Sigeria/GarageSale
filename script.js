@@ -222,6 +222,9 @@ $(document).ready(function() {
     
     async function displayItems() {
         const items = await fetchItems();
+
+        const typesSet = new Set();
+        typesSet.add("Sllferlkfekr")
     
         // Extract the header row
         const headers = items[0]; 
@@ -238,6 +241,8 @@ $(document).ready(function() {
         // Fill slides with data
         const slides = document.querySelectorAll('.pane');
         items.forEach((item, index) => {
+            typesSet.add(item[headerIndexes['type']]);
+
             const slideData = {
                 id: item[headerIndexes['id']],
                 name: item[headerIndexes['name']],
@@ -258,6 +263,13 @@ $(document).ready(function() {
             }
         });
 
+        typesSet.forEach(type => {
+            const button = document.createElement('button');
+            button.textContent = type;
+            button.addEventListener('click', () => filterItemsByType(type));
+            menu.appendChild(button);
+        });
+
         
     
         // Reinitialize the scrolling functionality
@@ -267,6 +279,11 @@ $(document).ready(function() {
         preloadAdjacentImages($ActualSlide);
 
 
+    }
+    
+    function filterItemsByType(type) {
+        // Ваш код для фильтрации и отображения элементов по типу
+        console.log(`Filtering items by type: ${type}`);
     }
 
     function preloadImage(image) {
