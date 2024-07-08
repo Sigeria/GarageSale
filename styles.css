@@ -16,7 +16,7 @@ body {
     overflow-x: hidden;
     color: rgba(255, 255, 255, 0.5);
     font-family: 'Poppins', sans-serif;
-    background-color: #f5f5dc;
+    background-color: #EFE2D9;
     /* Молочный цвет фона */
 }
 
@@ -45,7 +45,7 @@ body {
 }
 
 .pane {
-    border: 2px solid #000; /* Черная рамка */
+    border: 2px solid #978475; /* Коричневая рамка */
 }
 
 b {
@@ -84,10 +84,10 @@ span {
 }
 
 .image-container img {
-    height: 100%;
-    width: auto;
+    width: 100%;
+    height: auto;
     border-radius: 15px;
-    /* Закругленные углы */
+    border: 2px solid #978475; /* Коричневая рамка */
 }
 
 .text-container {
