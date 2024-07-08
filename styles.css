@@ -43,6 +43,10 @@ body {
     pointer-events: none;
 }
 
+.pane {
+    border: 2px solid #000; /* Черная рамка */
+}
+
 b {
     font-size: 80px;
     display: block;
@@ -82,4 +86,16 @@ span {
     width: auto;
     border-radius: 15px;
     /* Закругленные углы */
+}
+
+.text-container {
+    margin-top: 5%;
+    text-align: center;
+}
+
+.item-name,
+.item-price {
+    font-size: 24px;
+    color: #333;
+    margin: 5px 0;
 }

@@ -1,11 +1,11 @@
 // Функция для загрузки содержимого HTML файла
 function loadHTML(url, containerId) {
     fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById(containerId).innerHTML = data;
-      })
-      .catch(error => console.error('Error loading HTML:', error));
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById(containerId).innerHTML = data;
+        })
+        .catch(error => console.error('Error loading HTML:', error));
 }
 
 // Загрузить лоадер в контейнер с id "loaderContainer"
@@ -33,6 +33,50 @@ $(document).ready(function() {
     // Touch event support with Hammer.js
     const hammer = new Hammer(document.querySelector('#ScrollPane, .scrzone'));
     hammer.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+    hammer.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL, threshold: 0 });
+
+    let isPanning = false;
+    let startY = 0;
+    let currentY = 0;
+    let threshold = 100; // Минимальное расстояние для смены слайда
+
+    hammer.on('panstart', function(event) {
+        isPanning = true;
+        startY = window.scrollY + event.center.y;
+    });
+
+    hammer.on('panmove', function(event) {
+        if (isPanning) {
+            currentY = startY - event.center.y;
+            window.scrollTo(0, currentY);
+        }
+    });
+
+    hammer.on('panend', function(event) {
+        isPanning = false;
+        if ($ScrollState == false) {
+            $ScrollState = true;
+            let movedDistance = Math.abs(startY - (window.scrollY + event.center.y));
+            if (movedDistance > threshold) {
+                if (event.velocityY > 0) {
+                    UpdateScreen('-');
+                } else if (event.velocityY < 0) {
+                    UpdateScreen('+');
+                }
+            } else {
+                // Возвращаемся к текущему слайду
+                let currentSlide = $('.pane[data-id=' + $ActualSlide + ']');
+                gsap.to(window, {
+                    duration: $ScrollSpeed,
+                    scrollTo: { y: currentSlide.offset().top },
+                    ease: "power2.out",
+                    onComplete: function() {
+                        $ScrollState = false;
+                    }
+                });
+            }
+        }
+    });
 
     hammer.on('swipeup', function() {
         if ($ScrollState == false) {
@@ -107,6 +151,18 @@ $(document).ready(function() {
 
         imageContainer.appendChild(img);
         container.appendChild(imageContainer);
+
+        const textContainer = document.createElement('div');
+        textContainer.classList.add('text-container');
+        const itemName = document.createElement('div');
+        itemName.classList.add('item-name');
+        const itemPrice = document.createElement('div');
+        itemPrice.classList.add('item-price');
+
+        textContainer.appendChild(itemName);
+        textContainer.appendChild(itemPrice);
+        container.appendChild(textContainer);
+
         slide.appendChild(container);
 
         return slide;
@@ -151,6 +207,11 @@ $(document).ready(function() {
                 const image = slide.querySelector('img');
                 image.src = slideData.url;
                 image.alt = slideData.name;
+
+                const itemName = slide.querySelector('.item-name');
+                itemName.textContent = slideData.name;
+                const itemPrice = slide.querySelector('.item-price');
+                itemPrice.textContent = `Price: ${slideData.price}`;
             }
         });
 
@@ -165,14 +226,20 @@ $(document).ready(function() {
 
         if (operator == "+") {
             newIndex += 1;
+        console.log('Update scroll +');
+
         } else {
             newIndex -= 1;
+        console.log('Update scroll -');
+
         }
 
         if (newIndex < 0 || newIndex >= $ListSlides.length) {
             $ScrollState = false;
             return;
         }
+
+        console.log('Update scroll index', newIndex);
 
         $CibleSlide = $ListSlides[newIndex];
         $('#Helper').html("From <strong>" + $ActualSlide + "</strong> to <strong>" + $CibleSlide + "</strong>"); // helper
@@ -187,6 +254,7 @@ $(document).ready(function() {
             onComplete: function() {
                 $ScrollState = false;
                 $CibleSlideDOM.addClass('visible'); // Add visible class to target slide
+                $ActualSlide = $CibleSlide;
             }
         });
     }
