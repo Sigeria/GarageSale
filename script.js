@@ -12,7 +12,7 @@ function loadHTML(url, containerId) {
 loadHTML('loader.html', 'loaderContainer');
 
 $(document).ready(function() {
-    createSlides();
+    createEmptySlides();
     displayItems();
 
     // Mouse Wheel event : jQuery Mouse Wheel Plugin
@@ -92,7 +92,7 @@ $(document).ready(function() {
         }
     }
 
-    function createSlide(id) {
+    function createEmptySlide(id) {
         const slide = document.createElement('div');
         slide.classList.add('pane');
         slide.setAttribute('data-id', id);
@@ -112,11 +112,11 @@ $(document).ready(function() {
         return slide;
     }
 
-    function createSlides() {
+    function createEmptySlides() {
         const container = document.querySelector('#ScrollPane');
-        const numberOfSlides = 3; // Create 3 slides to be used as a pool
+        const numberOfSlides = 10; // Example number of empty slides to create
         for (let i = 0; i < numberOfSlides; i++) {
-            const slide = createSlide(i);
+            const slide = createEmptySlide(i);
             container.appendChild(slide);
         }
     }
@@ -136,56 +136,26 @@ $(document).ready(function() {
         // Remove header row from items array
         items.shift();
 
-        // Initialize current item index
-        let currentIndex = 0;
-
-        // Fill slides with initial data
+        // Fill slides with data
         const slides = document.querySelectorAll('.pane');
-        slides.forEach((slide, index) => {
-            if (currentIndex < items.length) {
-                const slideData = {
-                    id: items[currentIndex][headerIndexes['id']],
-                    name: items[currentIndex][headerIndexes['name']],
-                    price: items[currentIndex][headerIndexes['price']],
-                    url: items[currentIndex][headerIndexes['url']]
-                };
+        items.forEach((item, index) => {
+            const slideData = {
+                id: item[headerIndexes['id']],
+                name: item[headerIndexes['name']],
+                price: item[headerIndexes['price']],
+                url: item[headerIndexes['url']]
+            };
 
-                fillSlide(slide, slideData);
-                currentIndex++;
+            if (index < slides.length) {
+                const slide = slides[index];
+                const image = slide.querySelector('img');
+                image.src = slideData.url;
+                image.alt = slideData.name;
             }
         });
 
         // Reinitialize the scrolling functionality
         Init();
-    }
-
-    function fillSlide(slide, data) {
-        slide.querySelector('img').src = data.url;
-        slide.querySelector('img').alt = data.name;
-    }
-
-    function loadNextSlide() {
-        const slides = document.querySelectorAll('.pane');
-        const container = document.querySelector('#ScrollPane');
-
-        // Remove first slide and append it to the end
-        const firstSlide = slides[0];
-        container.removeChild(firstSlide);
-        container.appendChild(firstSlide);
-
-        // Get new data for the recycled slide
-        const newSlideIndex = currentIndex;
-        if (newSlideIndex < items.length) {
-            const slideData = {
-                id: items[newSlideIndex][headerIndexes['id']],
-                name: items[newSlideIndex][headerIndexes['name']],
-                price: items[newSlideIndex][headerIndexes['price']],
-                url: items[newSlideIndex][headerIndexes['url']]
-            };
-
-            fillSlide(firstSlide, slideData);
-            currentIndex++;
-        }
     }
 
     // ANIMATE
@@ -199,10 +169,9 @@ $(document).ready(function() {
             newIndex -= 1;
         }
 
-        if (newIndex < 0) {
-            newIndex = $ListSlides.length - 1;
-        } else if (newIndex >= $ListSlides.length) {
-            newIndex = 0;
+        if (newIndex < 0 || newIndex >= $ListSlides.length) {
+            $ScrollState = false;
+            return;
         }
 
         $CibleSlide = $ListSlides[newIndex];
@@ -218,9 +187,6 @@ $(document).ready(function() {
             onComplete: function() {
                 $ScrollState = false;
                 $CibleSlideDOM.addClass('visible'); // Add visible class to target slide
-                if (operator == "+") {
-                    loadNextSlide();
-                }
             }
         });
     }
