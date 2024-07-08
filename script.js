@@ -12,6 +12,7 @@ function loadHTML(url, containerId) {
 loadHTML('loader.html', 'loaderContainer');
 
 $(document).ready(function() {
+    createEmptySlides();
     displayItems();
 
     // Mouse Wheel event : jQuery Mouse Wheel Plugin
@@ -91,10 +92,10 @@ $(document).ready(function() {
         }
     }
 
-    function createSlide(item) {
+    function createEmptySlide(id) {
         const slide = document.createElement('div');
         slide.classList.add('pane');
-        slide.setAttribute('data-id', item.id);
+        slide.setAttribute('data-id', id);
 
         const container = document.createElement('div');
         container.classList.add('ct');
@@ -102,8 +103,7 @@ $(document).ready(function() {
         const imageContainer = document.createElement('div');
         imageContainer.classList.add('image-container');
         const img = document.createElement('img');
-        img.src = item.url;
-        img.alt = item.name;
+        img.alt = '';
 
         imageContainer.appendChild(img);
         container.appendChild(imageContainer);
@@ -112,12 +112,17 @@ $(document).ready(function() {
         return slide;
     }
 
+    function createEmptySlides() {
+        const container = document.querySelector('#ScrollPane');
+        const numberOfSlides = 10; // Example number of empty slides to create
+        for (let i = 0; i < numberOfSlides; i++) {
+            const slide = createEmptySlide(i);
+            container.appendChild(slide);
+        }
+    }
+
     async function displayItems() {
         const items = await fetchItems();
-
-        // Clear existing content in container
-        const container = document.querySelector('#ScrollPane');
-        container.innerHTML = '';
 
         // Extract the header row
         const headers = items[0]; 
@@ -131,8 +136,9 @@ $(document).ready(function() {
         // Remove header row from items array
         items.shift();
 
-        // Create and append slides
-        items.forEach(item => {
+        // Fill slides with data
+        const slides = document.querySelectorAll('.pane');
+        items.forEach((item, index) => {
             const slideData = {
                 id: item[headerIndexes['id']],
                 name: item[headerIndexes['name']],
@@ -140,8 +146,12 @@ $(document).ready(function() {
                 url: item[headerIndexes['url']]
             };
 
-            const slide = createSlide(slideData);
-            container.appendChild(slide);
+            if (index < slides.length) {
+                const slide = slides[index];
+                const image = slide.querySelector('img');
+                image.src = slideData.url;
+                image.alt = slideData.name;
+            }
         });
 
         // Reinitialize the scrolling functionality
