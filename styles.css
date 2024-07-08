@@ -13,6 +13,7 @@ body {
 
 body {
     overflow: auto;
+    overflow-x: hidden;
     color: rgba(255, 255, 255, 0.5);
     font-family: 'Poppins', sans-serif;
     background-color: #f5f5dc;
@@ -79,6 +80,7 @@ span {
     justify-content: center;
     align-items: center;
     margin-top: 10%;
+    overflow-x: hidden;
 }
 
 .image-container img {
@@ -98,4 +100,10 @@ span {
     font-size: 24px;
     color: #333;
     margin: 5px 0;
+}
+
+.text-container,
+.item-name,
+.item-price {
+    pointer-events: none;
 }

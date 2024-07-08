@@ -1,3 +1,8 @@
+let isPanning = false;
+    let startY = 0;
+    let currentY = 0;
+    let threshold = 100; 
+
 // Функция для загрузки содержимого HTML файла
 function loadHTML(url, containerId) {
     fetch(url)
@@ -35,24 +40,34 @@ $(document).ready(function() {
     hammer.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
     hammer.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL, threshold: 0 });
 
-    let isPanning = false;
-    let startY = 0;
-    let currentY = 0;
-    let threshold = 100; // Минимальное расстояние для смены слайда
-
-    hammer.on('panstart', function(event) {
-        isPanning = true;
-        startY = window.scrollY + event.center.y;
+    // Добавить обработчики для изображений внутри контейнера
+    document.querySelectorAll('.pane img').forEach(img => {
+        const imgHammer = new Hammer(img);
+        imgHammer.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL, threshold: 0 });
+        imgHammer.on('panstart', onPanStart);
+        imgHammer.on('panmove', onPanMove);
+        imgHammer.on('panend', onPanEnd);
     });
 
-    hammer.on('panmove', function(event) {
+    hammer.on('panstart', onPanStart);
+    hammer.on('panmove', onPanMove);
+    hammer.on('panend', onPanEnd);
+    hammer.on('swipeup', onSwipeUp);
+    hammer.on('swipedown', onSwipeDown);
+
+    function onPanStart(event) {
+        isPanning = true;
+        startY = window.scrollY + event.center.y;
+    }
+
+    function onPanMove(event) {
         if (isPanning) {
             currentY = startY - event.center.y;
             window.scrollTo(0, currentY);
         }
-    });
+    }
 
-    hammer.on('panend', function(event) {
+    function onPanEnd(event) {
         isPanning = false;
         if ($ScrollState == false) {
             $ScrollState = true;
@@ -76,21 +91,24 @@ $(document).ready(function() {
                 });
             }
         }
-    });
+    }
 
-    hammer.on('swipeup', function() {
+    function onSwipeUp() {
         if ($ScrollState == false) {
             $ScrollState = true;
             UpdateScreen('+');
         }
-    });
+    }
 
-    hammer.on('swipedown', function() {
+    function onSwipeDown() {
         if ($ScrollState == false) {
             $ScrollState = true;
             UpdateScreen('-');
         }
-    });
+    }
+
+    // Init function and other code remains the same
+
 
     // Init
     function Init() {
@@ -102,8 +120,8 @@ $(document).ready(function() {
             $ListSlides.push($(this).attr('data-id'));
         }); // List of slides (.pane)
         gsap.to(window, { duration: 0, scrollTo: { y: 0 } });
-        $('.visible').removeClass('visible');
-        $('.pane').first().addClass('visible');
+        //$('.visible').removeClass('visible');
+        //$('.pane').first().addClass('visible');
         $('#Helper').html("Init()"); // Helper
     }
 
@@ -136,38 +154,6 @@ $(document).ready(function() {
         }
     }
 
-    function createEmptySlide(id) {
-        const slide = document.createElement('div');
-        slide.classList.add('pane');
-        slide.setAttribute('data-id', id);
-
-        const container = document.createElement('div');
-        container.classList.add('ct');
-
-        const imageContainer = document.createElement('div');
-        imageContainer.classList.add('image-container');
-        const img = document.createElement('img');
-        img.alt = '';
-
-        imageContainer.appendChild(img);
-        container.appendChild(imageContainer);
-
-        const textContainer = document.createElement('div');
-        textContainer.classList.add('text-container');
-        const itemName = document.createElement('div');
-        itemName.classList.add('item-name');
-        const itemPrice = document.createElement('div');
-        itemPrice.classList.add('item-price');
-
-        textContainer.appendChild(itemName);
-        textContainer.appendChild(itemPrice);
-        container.appendChild(textContainer);
-
-        slide.appendChild(container);
-
-        return slide;
-    }
-
     function createEmptySlides() {
         const container = document.querySelector('#ScrollPane');
         const numberOfSlides = 10; // Example number of empty slides to create
@@ -177,21 +163,78 @@ $(document).ready(function() {
         }
     }
 
+    function createEmptySlide(id) {
+        const slide = document.createElement('div');
+        slide.classList.add('pane');
+        slide.setAttribute('data-id', id);
+    
+        const container = document.createElement('div');
+        container.classList.add('ct');
+    
+        const imageContainer = document.createElement('div');
+        imageContainer.classList.add('image-container');
+        const img = document.createElement('img');
+        img.alt = '';
+    
+        imageContainer.appendChild(img);
+        container.appendChild(imageContainer);
+    
+        const textContainer = document.createElement('div');
+        textContainer.classList.add('text-container');
+        const itemName = document.createElement('div');
+        itemName.classList.add('item-name');
+        const itemPrice = document.createElement('div');
+        itemPrice.classList.add('item-price');
+    
+        textContainer.appendChild(itemName);
+        textContainer.appendChild(itemPrice);
+        container.appendChild(textContainer);
+    
+        slide.appendChild(container);
+    
+        return slide;
+    }
+    
+    function setupLazyLoading() {
+        const options = {
+            root: null, // Use the viewport as the root
+            rootMargin: '0px',
+            threshold: 0.1 // Trigger when 10% of the slide is visible
+        };
+    
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const slide = entry.target;
+                    const image = slide.querySelector('img');
+                    if (image && image.dataset.src) {
+                        image.src = image.dataset.src;
+                        observer.unobserve(slide); // Stop observing once loaded
+                    }
+                }
+            });
+        }, options);
+    
+        document.querySelectorAll('.pane').forEach(slide => {
+            observer.observe(slide);
+        });
+    }
+    
     async function displayItems() {
         const items = await fetchItems();
-
+    
         // Extract the header row
         const headers = items[0]; 
-
+    
         // Map headers to indexes
         const headerIndexes = {};
         headers.forEach((header, index) => {
             headerIndexes[header.toLowerCase()] = index;
         });
-
+    
         // Remove header row from items array
         items.shift();
-
+    
         // Fill slides with data
         const slides = document.querySelectorAll('.pane');
         items.forEach((item, index) => {
@@ -201,13 +244,13 @@ $(document).ready(function() {
                 price: item[headerIndexes['price']],
                 url: item[headerIndexes['url']]
             };
-
+    
             if (index < slides.length) {
                 const slide = slides[index];
                 const image = slide.querySelector('img');
-                image.src = slideData.url;
+                image.dataset.src = slideData.url;
                 image.alt = slideData.name;
-
+    
                 const itemName = slide.querySelector('.item-name');
                 itemName.textContent = slideData.name;
                 const itemPrice = slide.querySelector('.item-price');
@@ -215,49 +258,98 @@ $(document).ready(function() {
             }
         });
 
+        
+    
         // Reinitialize the scrolling functionality
         Init();
+    
+        // Preload images for the initial set of slides
+        preloadAdjacentImages($ActualSlide);
+
+
     }
+
+    function preloadImage(image) {
+    if (image.dataset.src && !image.src) {
+        const img = new Image();
+        img.src = image.dataset.src;
+        img.onload = function() {
+            image.src = img.src;
+        };
+    }
+}
+
+function preloadAdjacentImages(currentSlideId) {
+    const slides = document.querySelectorAll('.pane');
+    slides.forEach((slide, index) => {
+        const slideId = slide.getAttribute('data-id');
+        if (slideId === currentSlideId) {
+            // Preload current slide image
+            const currentImage = slide.querySelector('img');
+            preloadImage(currentImage);
+
+            // Preload previous slide image
+            if (index > 0) {
+                const prevImage = slides[index - 1].querySelector('img');
+                preloadImage(prevImage);
+            }
+
+            // Preload next slide image
+            if (index < slides.length - 1) {
+                const nextImage = slides[index + 1].querySelector('img');
+                preloadImage(nextImage);
+            }
+        }
+    });
+}
+
+    
+    
+    
 
     // ANIMATE
     function UpdateScreen(operator) {
-        $ActualSlide = $CibleSlide;
-        let newIndex = $ListSlides.indexOf($ActualSlide);
+    $ActualSlide = $CibleSlide;
+    let newIndex = $ListSlides.indexOf($ActualSlide);
 
-        if (operator == "+") {
-            newIndex += 1;
+    if (operator == "+") {
+        newIndex += 1;
         console.log('Update scroll +');
 
-        } else {
-            newIndex -= 1;
+    } else {
+        newIndex -= 1;
         console.log('Update scroll -');
 
-        }
-
-        if (newIndex < 0 || newIndex >= $ListSlides.length) {
-            $ScrollState = false;
-            return;
-        }
-
-        console.log('Update scroll index', newIndex);
-
-        $CibleSlide = $ListSlides[newIndex];
-        $('#Helper').html("From <strong>" + $ActualSlide + "</strong> to <strong>" + $CibleSlide + "</strong>"); // helper
-        $ActualSlideDOM = $('.pane[data-id=' + $ActualSlide + ']');
-        $CibleSlideDOM = $('.pane[data-id=' + $CibleSlide + ']');
-        $ActualSlideDOM.removeClass('visible'); // Remove visible class from current slide
-        // Scroll To : Greensock GSAP
-        gsap.to(window, {
-            duration: $ScrollSpeed,
-            scrollTo: { y: $CibleSlideDOM.offset().top },
-            ease: "power2.out",
-            onComplete: function() {
-                $ScrollState = false;
-                $CibleSlideDOM.addClass('visible'); // Add visible class to target slide
-                $ActualSlide = $CibleSlide;
-            }
-        });
     }
+
+    if (newIndex < 0 || newIndex >= $ListSlides.length) {
+        $ScrollState = false;
+        return;
+    }
+
+    console.log('Update scroll index', newIndex);
+
+    $CibleSlide = $ListSlides[newIndex];
+    $('#Helper').html("From <strong>" + $ActualSlide + "</strong> to <strong>" + $CibleSlide + "</strong>"); // helper
+    $ActualSlideDOM = $('.pane[data-id=' + $ActualSlide + ']');
+    $CibleSlideDOM = $('.pane[data-id=' + $CibleSlide + ']');
+    //$ActualSlideDOM.removeClass('visible'); // Remove visible class from current slide
+    // Scroll To : Greensock GSAP
+    gsap.to(window, {
+        duration: $ScrollSpeed,
+        scrollTo: { y: $CibleSlideDOM.offset().top },
+        ease: "power2.out",
+        onComplete: function() {
+            $ScrollState = false;
+            //$CibleSlideDOM.addClass('visible'); // Add visible class to target slide
+            $ActualSlide = $CibleSlide;
+
+            // Preload images for the adjacent slides
+            preloadAdjacentImages($ActualSlide);
+        }
+    });
+}
+
 
     // Init() On Resize
     $(window).resize(function() {
