@@ -177,17 +177,23 @@ $(document).ready(function() {
         img.alt = '';
     
         imageContainer.appendChild(img);
-        container.appendChild(imageContainer);
-    
+        container.appendChild(imageContainer);    
+        
+        
+        const itemPrice = document.createElement('div');
+        itemPrice.classList.add('item-price');
+
         const textContainer = document.createElement('div');
         textContainer.classList.add('text-container');
         const itemName = document.createElement('div');
         itemName.classList.add('item-name');
-        const itemPrice = document.createElement('div');
-        itemPrice.classList.add('item-price');
+        
+        const itemDesc = document.createElement('div');
+        itemDesc.classList.add('item-description');
     
-        textContainer.appendChild(itemName);
         textContainer.appendChild(itemPrice);
+        textContainer.appendChild(itemName);
+        textContainer.appendChild(itemDesc);
         container.appendChild(textContainer);
     
         slide.appendChild(container);
@@ -246,6 +252,7 @@ $(document).ready(function() {
             const slideData = {
                 id: item[headerIndexes['id']],
                 name: item[headerIndexes['name']],
+                description: item[headerIndexes['description']],
                 price: item[headerIndexes['price']],
                 url: item[headerIndexes['url']]
             };
@@ -258,8 +265,12 @@ $(document).ready(function() {
     
                 const itemName = slide.querySelector('.item-name');
                 itemName.textContent = slideData.name;
+
+                const itemDescription = slide.querySelector('.item-description');
+                itemName.textContent = slideData.description;
+
                 const itemPrice = slide.querySelector('.item-price');
-                itemPrice.textContent = `Price: ${slideData.price}`;
+                itemPrice.textContent = `${slideData.price} GEL`;
             }
         });
 

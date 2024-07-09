@@ -159,14 +159,20 @@ span {
 
 .text-container {
     margin-top: 5%;
-    text-align: center;
+    text-align: left;
+    margin-left: 10px 0;
 }
 
-.item-name,
+.item-description,
+.item-name {
+    font-size: 24px;
+    color: var(--item-font-color);
+    margin-bottom: 10px; /* Отступ снизу для названия */
+}
+
 .item-price {
     font-size: 24px;
     color: var(--item-font-color);
-    margin: 5px 0;
 }
 
 body .text-container,
