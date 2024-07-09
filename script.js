@@ -17,9 +17,9 @@ function loadHTML(url, containerId) {
 loadHTML('loader.html', 'loaderContainer');
 
 $(document).ready(function() {
+    const container = document.querySelector('#ScrollPane');
     createEmptySlides();
     displayItems();
-
     // Mouse Wheel event : jQuery Mouse Wheel Plugin
     $('#ScrollPane, .scrzone').mousewheel(function(event) {
         event.preventDefault();
@@ -112,14 +112,7 @@ $(document).ready(function() {
 
     // Init
     function Init() {
-        $ScrollSpeed = 0.3; // Animation speed
-        $ScrollState = false; // Scroll possible if True - If False anim already in progress
-        $ActualSlide = $CibleSlide = $('.pane').first().attr('data-id'); // First slide
-        $ListSlides = [];
-        $('.pane').each(function() {
-            $ListSlides.push($(this).attr('data-id'));
-        }); // List of slides (.pane)
-        gsap.to(window, { duration: 0, scrollTo: { y: 0 } });
+        resetScroll();
         //$('.visible').removeClass('visible');
         //$('.pane').first().addClass('visible');
         $('#Helper').html("Init()"); // Helper
@@ -154,8 +147,7 @@ $(document).ready(function() {
         }
     }
 
-    function createEmptySlides() {
-        const container = document.querySelector('#ScrollPane');
+    function createEmptySlides() {        
         const numberOfSlides = 10; // Example number of empty slides to create
         for (let i = 0; i < numberOfSlides; i++) {
             const slide = createEmptySlide(i);
@@ -179,10 +171,9 @@ $(document).ready(function() {
         imageContainer.appendChild(img);
         container.appendChild(imageContainer);    
         
-        
         const itemPrice = document.createElement('div');
         itemPrice.classList.add('item-price');
-
+    
         const textContainer = document.createElement('div');
         textContainer.classList.add('text-container');
         const itemName = document.createElement('div');
@@ -229,11 +220,13 @@ $(document).ready(function() {
     let typesInited = false;
     const typesSet = new Set(["Все"]);
     
-    async function displayItems() {
+    async function displayItems(typeToShow = "Все") {
+        resetScroll();
+        
         const items = await fetchItems();
     
         // Extract the header row
-        const headers = items[0]; 
+        const headers = items[0];
     
         // Map headers to indexes
         const headerIndexes = {};
@@ -245,52 +238,85 @@ $(document).ready(function() {
         items.shift();
     
         // Fill slides with data
-        const slides = document.querySelectorAll('.pane');
-        items.forEach((item, index) => {
-            if (!typesInited){
-                typesSet.add(item[headerIndexes['type']]);
-            }
+        let slides = document.querySelectorAll('.pane');
+        for (let i = slides.length; i < items.length; i++) {
+            const slide = createEmptySlide(i);
+            container.appendChild(slide);
+            slides = document.querySelectorAll('.pane'); // Обновить список слайдов после добавления нового слайда
+        }
+        slides = document.querySelectorAll('.pane');
+        let slideIndex = 0;
+        items.forEach(item => {            
 
-            const slideData = {
-                id: item[headerIndexes['id']],
-                name: item[headerIndexes['name']],
-                description: item[headerIndexes['description']],
-                price: item[headerIndexes['price']],
-                url: item[headerIndexes['url']]
-            };
-    
-            if (index < slides.length) {
-                const slide = slides[index];
+                let slide = slides[slideIndex];
+            const itemType = item[headerIndexes['type']];
+            
+            if (typeToShow === "Все" || itemType === typeToShow) {
+                slide.style.display = "block";
+
+                const slideData = {
+                    id: item[headerIndexes['id']],
+                    name: item[headerIndexes['name']],
+                    description: item[headerIndexes['description']],
+                    price: item[headerIndexes['price']],
+                    url: item[headerIndexes['url']]
+                };                    
+
+                typesSet.add(item[headerIndexes['type']]);
+
                 const image = slide.querySelector('img');
                 image.dataset.src = slideData.url;
                 image.alt = slideData.name;
-    
+
                 const itemName = slide.querySelector('.item-name');
                 itemName.textContent = slideData.name;
 
                 const itemDescription = slide.querySelector('.item-description');
-                itemName.textContent = slideData.description;
+                itemDescription.textContent = slideData.description;
 
                 const itemPrice = slide.querySelector('.item-price');
                 itemPrice.textContent = `${slideData.price} GEL`;
+
+                slideIndex++;
+            }
+
+            for (let i = slideIndex; i < slides.length; i++) {
+                slides[i].style.display = "none";
             }
         });
-
-        InitTypes();
-
-        window.addEventListener('load', () => {
-            menu.scrollLeft = 0; // Устанавливаем скролл влево
-        });
-
-        
+    
+        if (!typesInited) {
+            typesSet.forEach(type => {
+                const button = document.createElement('button');
+                button.textContent = type;
+                button.addEventListener('click', () => displayItems(type));
+                menu.appendChild(button);
+            });
+            typesInited = true;
+        }
     
         // Reinitialize the scrolling functionality
         Init();
     
+        InitTypes();
+    
         // Preload images for the initial set of slides
         preloadAdjacentImages($ActualSlide);
+    }
 
-
+    function resetScroll() {
+        container.scrollLeft = 0;
+        $ScrollSpeed = 0.3; // Animation speed
+        $ScrollState = false; // Scroll possible if True - If False anim already in progress
+        $ActualSlide = $CibleSlide = $('.pane').first().attr('data-id'); // First slide
+        $ListSlides = [];
+        $('.pane').each(function() {
+            if (this.style.display == 'none'){
+                return;    
+            }
+            $ListSlides.push($(this).attr('data-id'));
+        }); // List of slides (.pane)
+        gsap.to(window, { duration: 0, scrollTo: { y: 0 } });
     }
 
     function InitTypes(){
@@ -313,7 +339,7 @@ $(document).ready(function() {
     }
 
     function preloadImage(image) {
-    if (image.dataset.src && !image.src) {
+    if (image.dataset.src != image.src) {
         const img = new Image();
         img.src = image.dataset.src;
         img.onload = function() {

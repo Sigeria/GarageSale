@@ -18,10 +18,43 @@
     --shadow-opacity: 0.3;
 }
 
+.menu {
+    display: flex;
+    justify-content: flex-start; /* Выравнивание по началу */
+    gap: 20px;
+    overflow-x: auto; /* Позволяет горизонтальную прокрутку */
+    white-space: nowrap; /* Убирает переносы строк */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.menu::-webkit-scrollbar {
+    display: none; /* Safari и Chrome */
+}
+
+.menu button {
+    background-color: var(--menu-bg);
+    border: 2px solid var(--menu-border);
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: var(--body-font);
+    color: var(--menu-font-color);
+    transition: background-color 0.3s, color 0.3s;
+    flex: none; /* Предотвращает изменение размера кнопок */
+}
+
+.menu button:hover {
+    background-color: var(--menu-hover-bg);
+    color: var(--menu-hover-color);
+}
+
 * {
     -o-box-sizing: border-box;
     box-sizing: border-box;
 }
+
 
 html,
 body {
@@ -47,32 +80,6 @@ body {
     position: fixed;
     z-index: 1000;
     width: 100%;
-}
-
-.menu {
-    display: flex;
-    justify-content: flex-start; /* Выравнивание по началу */
-    gap: 20px;
-    overflow-x: auto; /* Позволяет горизонтальную прокрутку */
-    white-space: nowrap; /* Убирает переносы строк */
-}
-
-.menu button {
-    background-color: var(--menu-bg);
-    border: 2px solid var(--menu-border);
-    border-radius: 5px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 16px;
-    font-family: var(--body-font);
-    color: var(--menu-font-color);
-    transition: background-color 0.3s, color 0.3s;
-    flex: none; /* Предотвращает изменение размера кнопок */
-}
-
-.menu button:hover {
-    background-color: var(--menu-hover-bg);
-    color: var(--menu-hover-color);
 }
 
 #ScrollPane {
@@ -101,6 +108,14 @@ body {
 
 .pane {
     border: 2px solid var(--pane-border); /* Коричневая рамка */
+}
+
+.pane {
+    display: none; /* По умолчанию скрыты */
+}
+
+.pane.visible {
+    display: block; /* Показать, если элемент имеет класс "visible" */
 }
 
 b {
@@ -179,7 +194,12 @@ span {
 
 body .text-container,
 .item-name,
+.image-container
 .item-price {
     pointer-events: none;
     white-space: pre-line
+}
+
+.slide{
+    display: block;
 }
