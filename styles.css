@@ -143,6 +143,20 @@ span {
     border: 2px solid var(--pane-border); /* Коричневая рамка */
 }
 
+@media (min-width: 768px) { /* Для экранов шире 768px */
+    .image-container {
+        height: auto; /* Убираем фиксированную высоту для контейнера */
+        margin-top: 5%; /* Корректируем верхний отступ, если нужно */
+    }
+
+    .image-container img {
+        width: auto; /* Устанавливаем автоматическую ширину */
+        max-width: 100%; /* Ограничиваем ширину */
+        height: 100%; /* Высота изображения будет равна высоте контейнера */
+        max-height: 50vh; /* Максимальная высота изображения 50% от высоты экрана */
+    }
+}
+
 .text-container {
     margin-top: 5%;
     text-align: center;
