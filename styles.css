@@ -51,9 +51,10 @@ body {
 
 .menu {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start; /* Выравнивание по началу */
     gap: 20px;
-    overflow-x: hidden;
+    overflow-x: auto; /* Позволяет горизонтальную прокрутку */
+    white-space: nowrap; /* Убирает переносы строк */
 }
 
 .menu button {
@@ -66,6 +67,7 @@ body {
     font-family: var(--body-font);
     color: var(--menu-font-color);
     transition: background-color 0.3s, color 0.3s;
+    flex: none; /* Предотвращает изменение размера кнопок */
 }
 
 .menu button:hover {

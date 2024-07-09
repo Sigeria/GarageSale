@@ -225,12 +225,12 @@ $(document).ready(function() {
             observer.observe(slide);
         });
     }
+
+    let typesInited = false;
+    const typesSet = new Set(["Все"]);
     
     async function displayItems() {
         const items = await fetchItems();
-
-        const typesSet = new Set();
-        typesSet.add("Sllferlkfekr")
     
         // Extract the header row
         const headers = items[0]; 
@@ -247,7 +247,9 @@ $(document).ready(function() {
         // Fill slides with data
         const slides = document.querySelectorAll('.pane');
         items.forEach((item, index) => {
-            typesSet.add(item[headerIndexes['type']]);
+            if (!typesInited){
+                typesSet.add(item[headerIndexes['type']]);
+            }
 
             const slideData = {
                 id: item[headerIndexes['id']],
@@ -274,11 +276,10 @@ $(document).ready(function() {
             }
         });
 
-        typesSet.forEach(type => {
-            const button = document.createElement('button');
-            button.textContent = type;
-            button.addEventListener('click', () => filterItemsByType(type));
-            menu.appendChild(button);
+        InitTypes();
+
+        window.addEventListener('load', () => {
+            menu.scrollLeft = 0; // Устанавливаем скролл влево
         });
 
         
@@ -290,6 +291,20 @@ $(document).ready(function() {
         preloadAdjacentImages($ActualSlide);
 
 
+    }
+
+    function InitTypes(){
+        if (typesInited){
+            return;
+        }
+
+        typesSet.forEach(type => {
+            const button = document.createElement('button');
+            button.textContent = type;
+            button.addEventListener('click', () => filterItemsByType(type));
+            menu.appendChild(button);
+        });
+        typesInited = true; // Устанавливаем флаг после первой инициализации
     }
     
     function filterItemsByType(type) {
