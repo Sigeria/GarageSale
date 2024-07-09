@@ -181,4 +181,5 @@ body .text-container,
 .item-name,
 .item-price {
     pointer-events: none;
+    white-space: pre-line
 }
