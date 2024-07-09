@@ -3,6 +3,12 @@ let isPanning = false;
     let currentY = 0;
     let threshold = 100; 
 
+    
+
+    let typesInited = false;
+    const typesSet = new Set(["все"]);
+    let currentType = '';
+
 // Функция для загрузки содержимого HTML файла
 function loadHTML(url, containerId) {
     fetch(url)
@@ -148,7 +154,7 @@ $(document).ready(function() {
     }
 
     function createEmptySlides() {        
-        const numberOfSlides = 10; // Example number of empty slides to create
+        const numberOfSlides = 20; // Example number of empty slides to create
         for (let i = 0; i < numberOfSlides; i++) {
             const slide = createEmptySlide(i);
             container.appendChild(slide);
@@ -216,12 +222,12 @@ $(document).ready(function() {
             observer.observe(slide);
         });
     }
-
-    let typesInited = false;
-    const typesSet = new Set(["Все"]);
     
-    async function displayItems(typeToShow = "Все") {
-        resetScroll();
+    async function displayItems(typeToShow = "все") {
+        if (currentType == typeToShow){
+            return;
+        }
+        currentType = typeToShow;
         
         const items = await fetchItems();
     
@@ -251,7 +257,7 @@ $(document).ready(function() {
                 let slide = slides[slideIndex];
             const itemType = item[headerIndexes['type']];
             
-            if (typeToShow === "Все" || itemType === typeToShow) {
+            if (typeToShow === "все" || itemType === typeToShow) {
                 slide.style.display = "block";
 
                 const slideData = {
@@ -286,19 +292,13 @@ $(document).ready(function() {
         });
     
         if (!typesInited) {
-            typesSet.forEach(type => {
-                const button = document.createElement('button');
-                button.textContent = type;
-                button.addEventListener('click', () => displayItems(type));
-                menu.appendChild(button);
-            });
-            typesInited = true;
-        }
-    
+            Init();
+            InitTypes();
+        }else{    
         // Reinitialize the scrolling functionality
-        Init();
-    
-        InitTypes();
+            resetScroll();
+        }
+
     
         // Preload images for the initial set of slides
         preloadAdjacentImages($ActualSlide);
@@ -327,15 +327,14 @@ $(document).ready(function() {
         typesSet.forEach(type => {
             const button = document.createElement('button');
             button.textContent = type;
-            button.addEventListener('click', () => filterItemsByType(type));
+            button.addEventListener('click', () => displayItems(type));
+            
+            if (type == 'все'){
+                //сделать выделенной
+            }
             menu.appendChild(button);
         });
         typesInited = true; // Устанавливаем флаг после первой инициализации
-    }
-    
-    function filterItemsByType(type) {
-        // Ваш код для фильтрации и отображения элементов по типу
-        console.log(`Filtering items by type: ${type}`);
     }
 
     function preloadImage(image) {

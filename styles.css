@@ -193,8 +193,13 @@ span {
 }
 
 body .text-container,
+.pane
+.pane.visible
 .item-name,
+.item-description,
 .image-container
+.image-container img
+.ct
 .item-price {
     pointer-events: none;
     white-space: pre-line
