@@ -177,7 +177,8 @@ span {
 .text-container {
     margin-top: 5%;
     text-align: left;
-    margin-left: 10px 0;
+    margin-left: 10px;
+    width: 100%;
 }
 
 .item-description,
