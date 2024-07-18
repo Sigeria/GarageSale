@@ -386,6 +386,7 @@ function preloadAdjacentImages(currentSlideId) {
 
     } else {
         newIndex -= 1;
+        newIndex = Math.max(0, newIndex);
         console.log('Update scroll -');
 
     }
